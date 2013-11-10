@@ -1,0 +1,28 @@
+http://www.guitarpitchshifter.com/
+
+OJB wrote:
+> Hey,
+> My name is Owen and I am currently working on a project for my University
+> Degree. I am a complete newbie to the world of DSP. I am basically looking
+> for *basic* algorithms (or as basic as possible) for simple pitch shifting
+> 
+> and time shifting. I'm not overly fussed with having the best possible
+> sound, I just generally need help with where to begin coding for a time
+> and pitch shifter. The signal processing will be applied to a single voice
+> only, so no orchestra/drums and other such things which can cause issues
+> with pitch and time shifting.
+> 
+
+Use ring buffer. Write at constant "speed" but read faster or slower
+than
+you write. If you read faster pitch goes up and if you read slower pitch
+goes down. Sound quality is pretty horrible due to the phase
+discontinuities (i.e. phases don't match when read and write passes each
+other) but it works. The length of the ring buffer is crucial parameter for
+satisfactory results.
+
+AverageMagnitude Difference Function
+
+
+
+http://www.dspdimension.com/admin/time-pitch-overview/

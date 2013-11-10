@@ -1,0 +1,1 @@
+Para usar wave (alsawave1), pasar como parametro los nombres que estan en /dev/snd (hwC0D0)
