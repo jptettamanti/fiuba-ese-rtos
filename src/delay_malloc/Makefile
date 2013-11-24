@@ -1,6 +1,7 @@
 SRC_PATH = ./
 
-INC_PATH = -I ./
+INC_PATH  = -I ./
+INC_PATH += -I ../
 
 FLAGS =
 

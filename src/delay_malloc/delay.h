@@ -1,7 +1,7 @@
 #ifndef DELAY_H
 #define DELAY_H
 
-typedef unsigned char sound_t;
+#include "sound.h"
 
 typedef struct
 {
@@ -11,9 +11,10 @@ typedef struct
 }delay_t;
 
 void delay_init(void *obj, int td, int fs);
+void delay_run(void *obj, sound_t *out, sound_t *in);
+void delay_end(void *obj);
+
 void delay_push(void *obj, sound_t *in);
 void delay_pull(void *obj, sound_t *out);
-void delay_end(void *obj);
-void delay_run(void *obj, sound_t *out, sound_t *in);
 
 #endif

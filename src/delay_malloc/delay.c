@@ -20,6 +20,26 @@ void delay_init(void *obj, int td, int fs)
 	*(delay_t **)obj = delay;
 }
 
+/* Solo por simetría y pruebas */
+void delay_run(void *obj, sound_t *out, sound_t *in)
+{
+	delay_pull(obj, out);
+	delay_push(obj, in);
+}
+
+void delay_end(void *obj)
+{
+	delay_t *delay = (delay_t *)obj;
+
+	// Libero el espacio usado por los datos usados del delay
+	if(delay->data)
+		free((void*)delay->data);
+
+	// Libero el espacio usado por la estructura delay
+	if(delay)
+		free((void*)delay);
+}
+
 void delay_push(void *obj, sound_t *in)
 {
 	delay_t *delay = (delay_t *)obj;
@@ -43,24 +63,4 @@ void delay_pull(void *obj, sound_t *out)
 
 	// Obtengo la muestra con delay
 	*out  = *(delay->data + ((delay->position + 1) % delay->size));
-}
-
-void delay_end(void *obj)
-{
-	delay_t *delay = (delay_t *)obj;
-
-	// Libero el espacio usado por los datos usados del delay
-	if(delay->data)
-		free((void*)delay->data);
-
-	// Libero el espacio usado por la estructura delay
-	if(delay)
-		free((void*)delay);
-}
-
-/* Solo por simetría y pruebas */
-void delay_run(void *obj, sound_t *out, sound_t *in)
-{
-	delay_pull(obj, out);
-	delay_push(obj, in);
 }

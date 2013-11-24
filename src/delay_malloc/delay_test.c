@@ -285,37 +285,30 @@ static void add_effect(
 	char *effect_name
 	)
 {
-	unsigned char *		ModWavePtr;
+	sound_t 		ModWave1 = 0,ModWave2 = 0;
 	snd_pcm_uframes_t	count;
 	void *			effect;
 
-	effect_init(&effect, 1, WaveRate/20);
-
-	// Allocate a buffer
-	if(!(ModWavePtr = (unsigned char *)malloc(WaveSize*sizeof(unsigned char))))
-	{
-		printf("Modified data will not fit in RAM\n");	
-		return;
-	}
+	// fs in Hz divided by 100 so that td=1 is set in 10ms intervals
+	effect_init(&effect, 10, WaveRate/100);
 
 	print_progress(effect_name, 0);
 	// Apply effect
-	for(count=0; count < WaveSize; count++)
+	for(count=0; count < (WaveSize * 8 / WaveBits); count += WaveBits / 8)
 	{
-		print_progress(effect_name, (count*100)/WaveSize);
-		effect_run(effect, ModWavePtr + count, WavePtr + count);
+		print_progress(effect_name, (count*100) / WaveSize * 8 / WaveBits );
+
+		ModWave1 = *(unsigned short*)(WavePtr + count) - (1 << (WaveBits - 1));
+
+		effect_run(effect, &ModWave2, &ModWave1);
+
+		*(unsigned short*)(WavePtr + count) = ModWave2 + (1 << (WaveBits - 1));
 	}
 	print_progress(effect_name, 100);
 	printf("\n");
 
 	// Free echo data
 	effect_end(effect);
-
-	// Free old unmodified data
-	free(WavePtr);
-
-	// Replace with new data
-	WavePtr = ModWavePtr;
 }
 
 
@@ -341,8 +334,15 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
+	if(WaveBits != 16)
+	{
+		printf("16 bit PCM audio only!!!\n");
+		return 0;
+	}
+
 	printf("Sample total %d\n", WaveSize);
 	printf("Sample rate  %d\n", WaveRate);
+	printf("Sample bits  %d\n", WaveBits);
 	add_effect(delay_init, delay_run, delay_end, "Delay");
 	printf("Finished effect line\n");
 
@@ -352,28 +352,9 @@ int main(int argc, char **argv)
 		printf("Can't open audio %s: %s\n", &SoundCardPortName[0], snd_strerror(err));
 		return 0;
 	}
-
-	switch (WaveBits)
-	{
-		case 8:
-			err = SND_PCM_FORMAT_U8;
-			break;
-			
-		case 16:
-			err = SND_PCM_FORMAT_S16;
-			break;
-			
-		case 24:
-			err = SND_PCM_FORMAT_S24;
-			break;
-			
-		case 32:
-			err = SND_PCM_FORMAT_S32;
-			break;
-	}
 		
 	// Set the audio card's hardware parameters (sample rate, bit resolution, etc)
-	if ((err = snd_pcm_set_params(PlaybackHandle, err, SND_PCM_ACCESS_RW_INTERLEAVED, WaveChannels, WaveRate, 1, 500000)) < 0)
+	if ((err = snd_pcm_set_params(PlaybackHandle, SND_PCM_FORMAT_S16, SND_PCM_ACCESS_RW_INTERLEAVED, WaveChannels, WaveRate, 1, 10000)) < 0)
 	{
 		printf("Can't set sound parameters: %s\n", snd_strerror(err));
 		return 0;
