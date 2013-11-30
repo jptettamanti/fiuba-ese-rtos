@@ -2,6 +2,7 @@ SRC_PATH = ./
 
 INC_PATH  = -I ./
 INC_PATH += -I ../
+INC_PATH += -I ../math
 
 FLAGS =
 

@@ -3,9 +3,6 @@
 
 //#define fs 		44100			// Sample frequency
 
-#define SOUND_MIN	32267
-#define SOUND_MAX	-32268
-
 typedef int sound_t;			// Basic sound type for register size independence
 
 typedef struct				// Template for generic effect type object

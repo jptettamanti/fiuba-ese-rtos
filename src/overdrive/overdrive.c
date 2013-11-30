@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "overdrive.h"
+#include "fixedptc.h"
 
 void overdrive_init(void *obj, int td, int fs)
 {
@@ -14,19 +15,21 @@ void overdrive_run(void *obj, sound_t *out, sound_t *in)
 {
 	overdrive_t *overdrive = (overdrive_t *)obj;
 
-	if( ((*in) <= (SOUND_MAX / 3)) && ((*in) > (SOUND_MIN / 3)) )
+	if( ((*in) <= fixedpt_div(1,3)) && ((*in) > fixedpt_div(-1,3)) )
 	{
-		*out = *in * 2;
+		*out = fixedpt_mul(*in, 2);
 	}
-	else if( ((*in) <= (2 * SOUND_MAX / 3)) && ((*in) > (SOUND_MAX / 3)) )
+	// [(+3) - ((+2) - (+3) * in)^2] / 3
+	else if( ((*in) <= fixedpt_div(2,3)) && ((*in) > fixedpt_div(1,3)) )
 	{
-		*out = SOUND_MAX * 2 - *in * 3;
-		*out = SOUND_MAX - (*out / 3) * (*out);
+		*out = fixedpt_mul(1, 2) - fixedpt_mul(*in, 3);
+		*out = fixedpt_div(fixedpt_mul(1, 3) - fixedpt_mul(*out, *out), 3);
 	}
-	else if( ((*in) <= (SOUND_MIN / 3)) && ((*in) > (2 * SOUND_MIN / 3)) )
+	// [(-3) + ((-2) - (-3) * in)^2] / 3
+	else if( ((*in) <= fixedpt_div(-1,3)) && (fixedpt_div(-2,3)) )
 	{
-		*out = SOUND_MIN * 2 + *in * 3;
-		*out = SOUND_MIN + (*out / 3) * (*out);
+		*out = fixedpt_mul(1, -2) + fixedpt_mul(*in, -3);
+		*out = fixedpt_div(fixedpt_mul(1, -3) + fixedpt_mul(*out, *out), 3);
 	}
 	else
 	{

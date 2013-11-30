@@ -285,12 +285,13 @@ static void add_effect(
 	char *effect_name
 	)
 {
-	sound_t 		ModWave1 = 0,ModWave2 = 0;
-	snd_pcm_uframes_t	count;
 	void *			effect;
+	snd_pcm_uframes_t	count;
+	sound_t 		ModWave1;
+	sound_t			ModWave2;
 
-	// Overdrive uses dummy parameters
-	effect_init(&effect, 0, 0);
+	// fs in Hz divided by 100 so that td=1 is set in 10ms intervals
+	effect_init(&effect, 20, WaveRate/100);
 
 	print_progress(effect_name, 0);
 	// Apply effect
@@ -298,16 +299,15 @@ static void add_effect(
 	{
 		print_progress(effect_name, (count*100) / WaveSize * 8 / WaveBits );
 
-		ModWave1 = *(unsigned short*)(WavePtr + count) - (1 << (WaveBits - 1));
+		ModWave1 = *(unsigned short*)(WavePtr + count) << 16;
 
 		effect_run(effect, &ModWave2, &ModWave1);
 
-		*(unsigned short*)(WavePtr + count) = ModWave2 + (1 << (WaveBits - 1));
+		*(unsigned short*)(WavePtr + count) = ModWave2 >> 16;
 	}
 	print_progress(effect_name, 100);
 	printf("\n");
 
-	// Free echo data
 	effect_end(effect);
 }
 
