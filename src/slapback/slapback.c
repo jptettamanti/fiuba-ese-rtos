@@ -4,7 +4,7 @@
 #include "echo.h"
 #include "fixedptc.h"
 
-#define effect_level 10
+#define mix   fixedpt_rconst(0.5)
 
 void echo_init(void *obj, int td, int fs)
 {
@@ -27,10 +27,7 @@ void echo_run(void *obj, sound_t *out, sound_t *in)
 	delay_push(echo->delay, in);
 
 	// Calculo la salida
-	*out = fixedpt_mul(*in, 100 - effect_level) + fixedpt_mul(fbk, effect_level);
-
-	// Re-normalizo la señal de salida
-	*out = fixedpt_div(*out, 100);
+	*out = fixedpt_mul(*in, fixedpt_rconst(1) - mix) + fixedpt_mul(fbk, mix);
 }
 
 void echo_end(void *obj)

@@ -17,7 +17,7 @@
 // Include the ALSA .H file that defines ALSA functions/data
 #include <alsa/asoundlib.h>
 
-#include "echo.h"
+#include "slapback.h"
 
 #pragma pack (1)
 /////////////////////// WAVE File Stuff /////////////////////
@@ -299,16 +299,16 @@ static void add_effect(
 	{
 		print_progress(effect_name, (count*100) / WaveSize * 8 / WaveBits );
 
-		ModWave1 = *(unsigned short*)(WavePtr + count) << 16;
+		ModWave1 = *(unsigned short*)(WavePtr + count) << 8;
 
 		effect_run(effect, &ModWave2, &ModWave1);
 
-		*(unsigned short*)(WavePtr + count) = ModWave2 >> 16;
+		*(unsigned short*)(WavePtr + count) = ModWave2 >> 8;
 	}
 	print_progress(effect_name, 100);
 	printf("\n");
 
-	// Free echo data
+	// Free slapback data
 	effect_end(effect);
 }
 
@@ -344,7 +344,7 @@ int main(int argc, char **argv)
 	printf("Sample total %d\n", WaveSize);
 	printf("Sample rate  %d\n", WaveRate);
 	printf("Sample bits  %d\n", WaveBits);
-	add_effect(echo_init, echo_run, echo_end, "Echo");
+	add_effect(slapback_init, slapback_run, slapback_end, "Slapback");
 	printf("Finished effect line\n");
 
 	// Open audio card we wish to use for playback

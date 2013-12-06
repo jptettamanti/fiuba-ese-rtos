@@ -15,24 +15,32 @@ void overdrive_run(void *obj, sound_t *out, sound_t *in)
 {
 	overdrive_t *overdrive = (overdrive_t *)obj;
 
-	if( ((*in) <= fixedpt_div(1,3)) && ((*in) > fixedpt_div(-1,3)) )
+	// Zona de ganancia lineal
+	if( ((*in) <= fixedpt_rconst(1/3)) && ((*in) > fixedpt_rconst(-1/3)) )
 	{
+		// Calculo la salida
 		*out = fixedpt_mul(*in, 2);
 	}
-	// [(+3) - ((+2) - (+3) * in)^2] / 3
-	else if( ((*in) <= fixedpt_div(2,3)) && ((*in) > fixedpt_div(1,3)) )
+	// Zona de ganancia cuadratica en primer cuadrante
+	else if( ((*in) <= fixedpt_rconst(2/3)) && ((*in) > fixedpt_rconst(1/3)) )
 	{
-		*out = fixedpt_mul(1, 2) - fixedpt_mul(*in, 3);
-		*out = fixedpt_div(fixedpt_mul(1, 3) - fixedpt_mul(*out, *out), 3);
+		// Calculo la salida
+		*out = fixedpt_rconst(+2) - fixedpt_mul(*in, +3);
+		*out = fixedpt_rconst(+3) - fixedpt_mul(*out, *out);
+		*out = fixedpt_div(*out, 3);
 	}
-	// [(-3) + ((-2) - (-3) * in)^2] / 3
-	else if( ((*in) <= fixedpt_div(-1,3)) && (fixedpt_div(-2,3)) )
+	// Zona de ganancia cuadratica en primer cuadrante
+	else if( ((*in) <= fixedpt_rconst(-1/3)) && ((*in) > fixedpt_rconst(-2/3)) )
 	{
-		*out = fixedpt_mul(1, -2) + fixedpt_mul(*in, -3);
-		*out = fixedpt_div(fixedpt_mul(1, -3) + fixedpt_mul(*out, *out), 3);
+		// Calculo la salida
+		*out = fixedpt_rconst(-2) + fixedpt_mul(*in, -3);
+		*out = fixedpt_rconst(-3) + fixedpt_mul(*out, *out);
+		*out = fixedpt_div(*out, 3);
 	}
+	// Zona sin ganancia
 	else
 	{
+		// Calculo la salida
 		*out = *in;
 	}
 

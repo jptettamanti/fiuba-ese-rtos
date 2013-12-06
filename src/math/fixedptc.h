@@ -108,20 +108,20 @@ typedef	unsigned long	fixedptud;
  */
 
 /* Multiplies two fixedpt numbers, returns the result. */
-static fixedpt fixedpt_mul(fixedpt A, fixedpt B)
+static inline fixedpt fixedpt_mul(fixedpt A, fixedpt B)
 {
 	return (((fixedptd)A * (fixedptd)B) >> FIXEDPT_FBITS);
 }
 
 
 /* Divides two fixedpt numbers, returns the result. */
-static fixedpt fixedpt_div(fixedpt A, fixedpt B)
+static inline fixedpt fixedpt_div(fixedpt A, fixedpt B)
 {
 	return (((fixedptd)A << FIXEDPT_FBITS) / (fixedptd)B);
 }
 
 /* Returns the square root of the given number, or -1 in case of error */
-static fixedpt fixedpt_sqrt(fixedpt A)
+static inline fixedpt fixedpt_sqrt(fixedpt A)
 {
 	int invert = 0;
 	int iter = FIXEDPT_FBITS;
@@ -157,7 +157,7 @@ static fixedpt fixedpt_sqrt(fixedpt A)
 
 /* Returns the sine of the given fixedpt number. 
  * Note: the loss of precision is extraordinary! */
-static fixedpt fixedpt_sin(fixedpt fp)
+static inline fixedpt fixedpt_sin(fixedpt fp)
 {
 	int sign = 1;
 	fixedpt sqr, result;
@@ -190,21 +190,21 @@ static fixedpt fixedpt_sin(fixedpt fp)
 
 
 /* Returns the cosine of the given fixedpt number */
-static fixedpt fixedpt_cos(fixedpt A)
+static inline fixedpt fixedpt_cos(fixedpt A)
 {
 	return (fixedpt_sin(FIXEDPT_HALF_PI - A));
 }
 
 
 /* Returns the tangens of the given fixedpt number */
-static fixedpt fixedpt_tan(fixedpt A)
+static inline fixedpt fixedpt_tan(fixedpt A)
 {
 	return fixedpt_div(fixedpt_sin(A), fixedpt_cos(A));
 }
 
 
 /* Returns the value exp(x), i.e. e^x of the given fixedpt number. */
-static fixedpt fixedpt_exp(fixedpt fp)
+static inline fixedpt fixedpt_exp(fixedpt fp)
 {
 	fixedpt xabs, k, z, R, xp;
 	const fixedpt LN2 = fixedpt_rconst(0.69314718055994530942);
@@ -242,7 +242,7 @@ static fixedpt fixedpt_exp(fixedpt fp)
 
 
 /* Returns the natural logarithm of the given fixedpt number. */
-static fixedpt fixedpt_ln(fixedpt x)
+static inline fixedpt fixedpt_ln(fixedpt x)
 {
 	fixedpt log2, xi;
 	fixedpt f, s, z, w, R;
@@ -282,14 +282,14 @@ static fixedpt fixedpt_ln(fixedpt x)
 	
 
 /* Returns the logarithm of the given base of the given fixedpt number */
-static fixedpt fixedpt_log(fixedpt x, fixedpt base)
+static inline fixedpt fixedpt_log(fixedpt x, fixedpt base)
 {
 	return (fixedpt_div(fixedpt_ln(x), fixedpt_ln(base)));
 }
 
 
 /* Return the power value (n^exp) of the given fixedpt numbers */
-static fixedpt fixedpt_pow(fixedpt n, fixedpt exp)
+static inline fixedpt fixedpt_pow(fixedpt n, fixedpt exp)
 {
 	if (exp == 0)
 		return (FIXEDPT_ONE);
@@ -298,11 +298,28 @@ static fixedpt fixedpt_pow(fixedpt n, fixedpt exp)
 	return (fixedpt_exp(fixedpt_mul(fixedpt_ln(n), exp)));
 }
 
-/* Returns the sine of the given fixedpt number. 
- * Note: the loss of precision is extraordinary! */
+/* Returns the triangular wave value of the given fixedpt number. 
+ */
+static inline fixedpt fixedpt_tri(fixedpt fp)
+{
+	fp %= FIXEDPT_TWO;
+	fp -= FIXEDPT_ONE;
+
+	if(fp > FIXEDPT_ONE_HALF)
+		fp = -fp + FIXEDPT_ONE;
+	else if(fp < -FIXEDPT_ONE_HALF)
+		fp = -fp - FIXEDPT_ONE;
+	else
+		fp = +fp;
+
+	return fixedpt_mul(FIXEDPT_TWO, fp);
+}
+
+/* Returns the sign of the given fixedpt number. 
+ */
 static inline fixedpt fixedpt_sign(fixedpt fp)
 {
-	return (fp < 0) ? -1 : 1;
+	return (fp < 0) ? -FIXEDPT_ONE : FIXEDPT_ONE;
 }
 
 /**
@@ -314,7 +331,7 @@ static inline fixedpt fixedpt_sign(fixedpt fp)
  * be returned, meaning there will be invalid, bogus digits outside the
  * specified precisions.
  */
-static void fixedpt_str(fixedpt A, char *str, int max_dec)
+static inline void fixedpt_str(fixedpt A, char *str, int max_dec)
 {
 	int ndec = 0, slen = 0;
 	char tmp[12] = {0};
@@ -356,9 +373,9 @@ static void fixedpt_str(fixedpt A, char *str, int max_dec)
 		str[slen] = '\0';
 }
 
-/* Converts the given fixedpt number into a string, using a static
+/* Converts the given fixedpt number into a string, using a static inline
  * (non-threadsafe) string buffer */
-static char* fixedpt_cstr(const fixedpt A, const int max_dec)
+static inline char* fixedpt_cstr(const fixedpt A, const int max_dec)
 {
 	static char str[25];
 

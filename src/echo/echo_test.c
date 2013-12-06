@@ -299,11 +299,11 @@ static void add_effect(
 	{
 		print_progress(effect_name, (count*100) / WaveSize * 8 / WaveBits );
 
-		ModWave1 = *(unsigned short*)(WavePtr + count) << 16;
+		ModWave1 = *(unsigned short*)(WavePtr + count) << 8;
 
 		effect_run(effect, &ModWave2, &ModWave1);
 
-		*(unsigned short*)(WavePtr + count) = ModWave2 >> 16;
+		*(unsigned short*)(WavePtr + count) = ModWave2 >> 8;
 	}
 	print_progress(effect_name, 100);
 	printf("\n");

@@ -17,7 +17,7 @@
 // Include the ALSA .H file that defines ALSA functions/data
 #include <alsa/asoundlib.h>
 
-#include "overdrive.h"
+#include "wah.h"
 
 #pragma pack (1)
 /////////////////////// WAVE File Stuff /////////////////////
@@ -285,10 +285,10 @@ static void add_effect(
 	char *effect_name
 	)
 {
-	void *			effect;
 	snd_pcm_uframes_t	count;
 	sound_t 		ModWave1;
 	sound_t			ModWave2;
+	void *			effect;
 
 	// fs in Hz divided by 100 so that td=1 is set in 10ms intervals
 	effect_init(&effect, 20, WaveRate/100);
@@ -308,6 +308,7 @@ static void add_effect(
 	print_progress(effect_name, 100);
 	printf("\n");
 
+	// Free wah data
 	effect_end(effect);
 }
 
@@ -343,7 +344,7 @@ int main(int argc, char **argv)
 	printf("Sample total %d\n", WaveSize);
 	printf("Sample rate  %d\n", WaveRate);
 	printf("Sample bits  %d\n", WaveBits);
-	add_effect(overdrive_init, overdrive_run, overdrive_end, "Overdrive");
+	add_effect(wah_init, wah_run, wah_end, "Wah");
 	printf("Finished effect line\n");
 
 	// Open audio card we wish to use for playback
